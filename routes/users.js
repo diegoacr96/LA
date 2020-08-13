@@ -69,17 +69,17 @@ usersRouter.route('/:id')
     //Manejando evento en el cual el usuario no se encuentra activo
     throw "usuario no activo"
   }) 
-  .then(user =>{
+  .then(userDB =>{
 
     //retornando usuario actualizado
     return res.status(200).json({
       ok: true,
-      user
+      user: userDB
     })
   })
   .catch(err => {
-    return res.status(401).json({
-      ok: true,
+    return res.status(304).json({
+      ok: false,
       err:{
         message: err
       }
@@ -90,6 +90,33 @@ usersRouter.route('/:id')
 //cambiando el estado del usuario
 .delete((req, res) => {
 
+  //obteniendo id del usuario a eliminar
+  const id = req.params.id
+
+  //Pasando ele stado del usuario a inactivo
+  Users.findByIdAndUpdate(id, {
+    active: false
+  }, {new: true})
+  .then(userDB => {
+
+    //retornando usuario actualizado
+    return res.status(200)
+    .json({
+      ok: true,
+      user: userDB
+    })
+  })
+  .catch( err => {
+
+    //manejando errores
+    return res.status(304)
+    .json({
+      ok: false,
+      err:{
+        message: err
+      }
+    })
+  })
 })
 
 module.exports = usersRouter
