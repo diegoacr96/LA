@@ -3,12 +3,13 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 const Users = require('../models/users')
+const isLoggedIn = require('../middelwares/authorization')
 
 const usersRouter = express.Router()
-
+const app = express()
 /* Creando usuarios. */
 usersRouter.route('/')
-.post((req, res, next) => {
+.post((req, res) => {
   const body = req.body
 
   //estableciendo valores del schema
@@ -42,8 +43,15 @@ usersRouter.route('/')
     })
   })
 })
-.get((req, res, next) => {
 
+usersRouter.use(isLoggedIn)
+usersRouter.route('/')
+.get((req, res) => {
+  res.status(200)
+  res.json({
+    ok: true,
+    user: req.user
+  })
 })
 
 module.exports = usersRouter
