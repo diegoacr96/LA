@@ -1,6 +1,7 @@
 const express = require('express')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const _ = require('underscore')
 
 const Users = require('../models/users')
 const isLoggedIn = require('../middelwares/authorization')
@@ -44,14 +45,51 @@ usersRouter.route('/')
   })
 })
 
+
+//Middleware de autorización para solo realizar operaciones si el usuario lo tiene permitido
 usersRouter.use(isLoggedIn)
-usersRouter.route('/')
-.get((req, res) => {
-  res.status(200)
-  res.json({
-    ok: true,
-    user: req.user
+
+// manejando la actualización del usuario
+usersRouter.route('/:id')
+.put((req, res) => {
+  const id= req.params.id
+  const body= _.pick(req.body, "email")
+
+  //Buscando usuario en la base de datos mediante el id
+  Users.findById(id)
+  .then(userDB => {
+
+    //revisando el el usuario se encuentra activo
+    if(userDB.active){
+
+      //Realizando la actualización de los datos
+      return Users.findByIdAndUpdate(id, body, {new: true})
+    }
+
+    //Manejando evento en el cual el usuario no se encuentra activo
+    throw "usuario no activo"
+  }) 
+  .then(user =>{
+
+    //retornando usuario actualizado
+    return res.status(200).json({
+      ok: true,
+      user
+    })
   })
+  .catch(err => {
+    return res.status(401).json({
+      ok: true,
+      err:{
+        message: err
+      }
+    })
+  })
+})
+
+//cambiando el estado del usuario
+.delete((req, res) => {
+
 })
 
 module.exports = usersRouter
