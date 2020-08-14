@@ -18,7 +18,7 @@ loginRouter.route('/')
         if(bcrypt.compareSync(body.password, userDB.password)){
 
             //Si las credenciales son correctas se realiza la respuesta del token
-            const token = jwt.sign({email: userDB.email}, "thisIsAPrivateKey", {expiresIn: '1h'})
+            const token = jwt.sign({email: userDB.email, id: userDB.id}, "thisIsAPrivateKey", {expiresIn: '1h'})
             res.status(200)
             res.json({
                 ok: true,

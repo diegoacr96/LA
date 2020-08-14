@@ -40,8 +40,14 @@ const upload = multer({
   fileFilter: fileFilter
 })
 
+
+
+/****************************************************************************
+  Endpoints
+*****************************************************************************/
+
+
 const usersRouter = express.Router()
-const app = express()
 /* Creando usuarios. */
 usersRouter.route('/')
 .post((req, res) => {
@@ -79,12 +85,35 @@ usersRouter.route('/')
   })
 })
 
-
 //Middleware de autorización para solo realizar operaciones si el usuario lo tiene permitido
 usersRouter.use(isLoggedIn)
 
-// manejando la actualización del usuario
 usersRouter.route('/:id')
+// Solicitando información sobre un usuario
+.get((req, res) => {
+
+  //Verificar si el usuario es diferente al que se encuentra autenticado
+  let id = req.params.id === "me"? req.user.id: req.params.id
+  Users.findById(id)
+  .then((userDB) => {
+    return res.status(200)
+    .json({
+      ok: true,
+      user: userDB
+    })
+  })
+  .catch(err => {
+    return res.status(400)
+    .json({
+      ok: false,
+      err:{
+        message: err
+      }
+    })
+  })
+})
+
+// manejando la actualización del usuario
 .put((req, res) => {
   const id= req.params.id
   const body= _.pick(req.body, "email", "active", "visible")
@@ -242,7 +271,6 @@ usersRouter.route('/:id/set/image/')
 .patch((req, res) => {
   const id=req.params.id
   const file = req.file
-  console.log(file.nameId)
   Users.findByIdAndUpdate(id, {
     img: file.nameId
   }, {new: true})
