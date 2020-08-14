@@ -70,7 +70,7 @@ usersRouter.route('/')
     res.status(201)
     res.json({
       ok: true,
-      userDB,
+      user: userDB,
       catFact: req.fact,
       token
     })
@@ -88,36 +88,6 @@ usersRouter.route('/')
 
 //Middleware de autorización para solo realizar operaciones si el usuario lo tiene permitido
 usersRouter.use(isLoggedIn)
-
-
-//logout del usuario
-usersRouter.route('/authorization')
-.get((req, res) => {
-  const token = req.get('Authorization')
-
-  //Añadiendo el token a la blacklist
-  const blackList = BlackList({
-    token:  token
-  })
-
-  blackList.save()
-  .then(() => {
-    res.status(200)
-    .json({
-      ok: true,
-      catFact: req.fact,
-      message: "sesion finalizada"
-    })
-  })
-  .catch(err => {
-    res.status(400)
-    .json({
-      ok: true,
-      err
-    })
-  })
-})
-
 
 usersRouter.route('/:id')
 // Solicitando información sobre un usuario
@@ -217,7 +187,7 @@ usersRouter.route('/:id')
 
 
 //Cambio de active del usuario
-usersRouter.route('/:id/set/status/:active')
+usersRouter.route('/:id/set/status/active/:active')
 .patch((req, res) => {
   const id= req.params.id
   const active= req.params.active

@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 const Users = require('../models/users')
+const BlackList = require('../models/blacklist')
+const isLoggedIn = require('../middelwares/authorization')
 
 const loginRouter = express.Router()
 
@@ -13,6 +15,7 @@ loginRouter.route('/')
     //buscando usuario por medio del email
     Users.findOne({email: body.email})
     .then(userDB => {
+        if(!userDB) throw "email o contraseña incorrectos"
 
         //si el usuario es encontrado realiza un comparesync entre las contraseñas para saber si son la misma
         if(bcrypt.compareSync(body.password, userDB.password)){
@@ -27,7 +30,7 @@ loginRouter.route('/')
             })
         }
         else{
-            return new Error ("email o contraseña incorrectos")
+            throw "email o contraseña incorrectos"
         }
         
     })
@@ -37,10 +40,42 @@ loginRouter.route('/')
         res.status(404)
         res.json({
             ok: false,
-            err
+            err:{
+                message: err
+            }
         })
     })
     
+})
+
+
+//logout del usuario
+loginRouter.use(isLoggedIn)
+loginRouter.route('')
+.get((req, res) => {
+  const token = req.get('Authorization')
+
+  //Añadiendo el token a la blacklist
+  const blackList = BlackList({
+    token:  token
+  })
+
+  blackList.save()
+  .then(() => {
+    res.status(200)
+    .json({
+      ok: true,
+      catFact: req.fact,
+      message: "sesion finalizada"
+    })
+  })
+  .catch(err => {
+    res.status(400)
+    .json({
+      ok: true,
+      err
+    })
+  })
 })
 
 

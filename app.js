@@ -16,7 +16,7 @@ var app = express();
 
 mongoose.set('useCreateIndex', true)
 
-mongoose.connect('mongodb+srv://diegoacr96:ENXUTPnUp3mkuZB@cluster0-yq0oq.mongodb.net/LAusers', {
+mongoose.connect('mongodb://localhost:27017/LAusers', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false
