@@ -7,8 +7,8 @@ const fs = require('fs')
 const path = require('path')
 
 const Users = require('../models/users')
+const BlackList = require('../models/blacklist')
 const isLoggedIn = require('../middelwares/authorization')
-const { json } = require('body-parser')
 
 
 //multer configuration
@@ -88,6 +88,35 @@ usersRouter.route('/')
 //Middleware de autorización para solo realizar operaciones si el usuario lo tiene permitido
 usersRouter.use(isLoggedIn)
 
+
+//logout del usuario
+usersRouter.route('/authorization')
+.get((req, res) => {
+  const token = req.get('Authorization')
+
+  //Añadiendo el token a la blacklist
+  const blackList = BlackList({
+    token:  token
+  })
+
+  blackList.save()
+  .then(() => {
+    res.status(200)
+    .json({
+      ok: true,
+      message: "sesion finalizada"
+    })
+  })
+  .catch(err => {
+    res.status(400)
+    .json({
+      ok: true,
+      err
+    })
+  })
+})
+
+
 usersRouter.route('/:id')
 // Solicitando información sobre un usuario
 .get((req, res) => {
@@ -106,9 +135,7 @@ usersRouter.route('/:id')
     return res.status(400)
     .json({
       ok: false,
-      err:{
-        message: err
-      }
+      err
     })
   })
 })
