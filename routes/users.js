@@ -161,6 +161,16 @@ usersRouter.route('/:id/set/status/:active')
   const id= req.params.id
   const active= req.params.active
 
+  //validación de información recibida
+  if(active != "true" && active != "false"){
+    return res.status(400)
+    .json({
+      ok: false,
+      err:{
+        message: "active debe ser true o false"
+      }
+    })
+  }
   //actualizando usuario
   Users.findByIdAndUpdate(id, {
     active: active,
@@ -183,6 +193,46 @@ usersRouter.route('/:id/set/status/:active')
       err:{
         message: message
       }
+    })
+  })
+})
+
+//cambio del visible del usuario
+usersRouter.route('/:id/set/status/visible/:visible')
+.patch((req, res) => {
+  const id = req.params.id
+  const visible = req.params.visible
+
+  //validación de información recibida
+  if(visible != "true" && visible != "false"){
+    return res.status(400)
+    .json({
+      ok: false,
+      err:{
+        message: "visible debe ser true o false"
+      }
+    })
+  }
+
+  //Actualizando estado visible
+  Users.findByIdAndUpdate(id, {
+    visible: visible
+  },
+  {new: true})
+  .then(userDB => {
+    return res.status(200)
+    .json({
+      ok: true,
+      user: userDB
+    })
+    .catch(err => {
+      return res.status(400)
+      .json({
+        ok: false,
+        err:{
+          message: err
+        }
+      })
     })
   })
 })
