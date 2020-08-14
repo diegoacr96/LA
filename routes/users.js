@@ -8,6 +8,7 @@ const path = require('path')
 
 const Users = require('../models/users')
 const isLoggedIn = require('../middelwares/authorization')
+const { json } = require('body-parser')
 
 
 //multer configuration
@@ -153,6 +154,39 @@ usersRouter.route('/:id')
   })
 })
 
+
+//Cambio de active del usuario
+usersRouter.route('/:id/set/status/:active')
+.patch((req, res) => {
+  const id= req.params.id
+  const active= req.params.active
+
+  //actualizando usuario
+  Users.findByIdAndUpdate(id, {
+    active: active,
+  }, {new: true})
+  .then(userDB => {
+
+    //manejo de actualización exitosa
+    return res.status(200)
+    .json({
+      ok: true,
+      userDB
+    })
+  })
+  .catch(err => {
+
+    //manejo de error
+    return res.status(400)
+    .json({
+      ok: true,
+      err:{
+        message: message
+      }
+    })
+  })
+})
+
 usersRouter.use(upload.single('profilePic'))
 usersRouter.route('/:id/set/image/')
 .patch((req, res) => {
@@ -163,10 +197,14 @@ usersRouter.route('/:id/set/image/')
     img: file.nameId
   }, {new: true})
   .then(uploaded => {
-    res.json(uploaded)
+    return res.status(200)
+    .json({
+      ok: true,
+      user: uploaded
+    })
   })
   .catch(err => {
-    res.json({
+    return res.json({
       ok: false,
       err: {
         message: err
