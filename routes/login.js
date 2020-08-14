@@ -22,19 +22,12 @@ loginRouter.route('/')
             res.status(200)
             res.json({
                 ok: true,
+                catFact: req.fact,
                 token
             })
         }
         else{
-
-            //Manejo de credeciales incorrectas
-            res.status(404)
-            res.json({
-                ok: false,
-                err: {
-                    message: "email o contraseña incorrectos"
-                }
-            })
+            return new Error ("email o contraseña incorrectos")
         }
         
     })
@@ -44,9 +37,7 @@ loginRouter.route('/')
         res.status(404)
         res.json({
             ok: false,
-            err: {
-                message: "email o contraseña incorrectos"
-            }
+            err
         })
     })
     

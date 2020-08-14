@@ -71,6 +71,7 @@ usersRouter.route('/')
     res.json({
       ok: true,
       userDB,
+      catFact: req.fact,
       token
     })
   })
@@ -104,6 +105,7 @@ usersRouter.route('/authorization')
     res.status(200)
     .json({
       ok: true,
+      catFact: req.fact,
       message: "sesion finalizada"
     })
   })
@@ -128,6 +130,7 @@ usersRouter.route('/:id')
     return res.status(200)
     .json({
       ok: true,
+      catFact: req.fact,
       user: userDB
     })
   })
@@ -164,6 +167,7 @@ usersRouter.route('/:id')
     //retornando usuario actualizado
     return res.status(200).json({
       ok: true,
+      catFact: req.fact,
       user: userDB
     })
   })
@@ -194,6 +198,7 @@ usersRouter.route('/:id')
     return res.status(200)
     .json({
       ok: true,
+      catFact: req.fact,
       user: userDB
     })
   })
@@ -237,7 +242,8 @@ usersRouter.route('/:id/set/status/:active')
     return res.status(200)
     .json({
       ok: true,
-      userDB
+      catFact: req.fact,
+      user: userDB
     })
   })
   .catch(err => {
@@ -247,7 +253,7 @@ usersRouter.route('/:id/set/status/:active')
     .json({
       ok: true,
       err:{
-        message: message
+        message: err
       }
     })
   })
@@ -279,6 +285,7 @@ usersRouter.route('/:id/set/status/visible/:visible')
     return res.status(200)
     .json({
       ok: true,
+      catFact: req.fact,
       user: userDB
     })
     .catch(err => {
@@ -305,6 +312,7 @@ usersRouter.route('/:id/set/image/')
     return res.status(200)
     .json({
       ok: true,
+      catFact: req.fact,
       user: uploaded
     })
   })
