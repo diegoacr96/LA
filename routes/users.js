@@ -2,9 +2,42 @@ const express = require('express')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const _ = require('underscore')
+const multer = require('multer')
+const fs = require('fs')
+const path = require('path')
 
 const Users = require('../models/users')
 const isLoggedIn = require('../middelwares/authorization')
+
+
+//multer configuration
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+      cb(null, './uploads/');
+  },
+  filename: function(req, file, cb) {
+      const now = new Date().toISOString(); 
+      const date = now.replace(/:/g, '-');
+
+      // Guardando el nombre de la imagen para almacenarla en la base de datos
+      file.nameId= date + file.originalname
+      cb(null, file.nameId);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  // reject a file
+  if(file.mimetype === "image/jpeg" || file.mimetype === "image/png") cb(null, true)
+  else cb(null, false)
+}
+
+const upload = multer({
+  storage: storage, 
+  limits: {
+    fileSize: 1024 * 1024
+  },
+  fileFilter: fileFilter
+})
 
 const usersRouter = express.Router()
 const app = express()
@@ -53,7 +86,7 @@ usersRouter.use(isLoggedIn)
 usersRouter.route('/:id')
 .put((req, res) => {
   const id= req.params.id
-  const body= _.pick(req.body, "email")
+  const body= _.pick(req.body, "email", "active", "visible")
 
   //Buscando usuario en la base de datos mediante el id
   Users.findById(id)
@@ -95,7 +128,8 @@ usersRouter.route('/:id')
 
   //Pasando ele stado del usuario a inactivo
   Users.findByIdAndUpdate(id, {
-    active: false
+    active: false,
+    visible: false
   }, {new: true})
   .then(userDB => {
 
@@ -113,6 +147,28 @@ usersRouter.route('/:id')
     .json({
       ok: false,
       err:{
+        message: err
+      }
+    })
+  })
+})
+
+usersRouter.use(upload.single('profilePic'))
+usersRouter.route('/:id/set/image/')
+.patch((req, res) => {
+  const id=req.params.id
+  const file = req.file
+  console.log(file.nameId)
+  Users.findByIdAndUpdate(id, {
+    img: file.nameId
+  }, {new: true})
+  .then(uploaded => {
+    res.json(uploaded)
+  })
+  .catch(err => {
+    res.json({
+      ok: false,
+      err: {
         message: err
       }
     })

@@ -17,7 +17,11 @@ mongoose.set('useCreateIndex', true)
 mongoose.connect('mongodb+srv://diegoacr96:ENXUTPnUp3mkuZB@cluster0-yq0oq.mongodb.net/LAusers', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  useFindAndModify: false
 });
+
+
+app.use('/uploads', express.static('uploads', ))
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
